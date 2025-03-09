@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JARVIS - Virtual Assistant</title>
+    <link rel="shortcut icon" href="avatar.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200;300;400;500;600;700&display=swap");
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Roboto Mono", monospace;
+        }
+        .main {
+            min-height: 100vh;
+            position: relative;
+            width: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main .image-container {
+            padding: 10px;
+        }
+        .main .image-container .image {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main .image-container .image img {
+            width: 350px;
+            align-items: center;
+        }
+
+        .main .image-container h1 {
+            color: #00bcd4;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 40px;
+        }
+        .main .image-container h5 {
+            color: #00bcd4;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .main .image-container p {
+            color: #324042;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .main .input {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40vw;
+            height: 50px;
+            border-radius: 20px;
+            background: rgb(202 253 255 / 50%);
+        }
+
+        .main .input .talk {
+            background: transparent;
+            outline: none;
+            border: none;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .main .input .talk i {
+            font-size: 20px;
+            color: #aed0d0;
+        }
+
+        .main .input .content {
+            color: #aed0d0;
+            font-size: 15px;
+            margin-right: 20px;
+        }
+    </style>
+</head> 
+<body>
+    <section class="main">
+        <div class="image-container">
+            <div class="image">
+                <img src="gipy.gif" alt="JARVIS image">
+            </div>
+            <h1>J A R V I S </h1>
+            <h5>Created by Darshan</h5>
+            <p>I am a Virtual Assistant JARVIS, How may I help you?</p>
+            <p>To give a command, click the microphone button and say "JARVIS" followed by your command.</p>
+            <p>For translation, say "translate to [language] [text]". For example, "translate to Spanish Hello, how are you?".</p>
+        </div>
+        <div class="input">
+            <button class="talk"><i class="fas fa-microphone-alt"></i></button>
+            <h1 class="content"> Click here to speak</h1>
+        </div>
+    </section>
+
+    <script>
+        const btn = document.querySelector('.talk');
+        const content = document.querySelector('.content'); 
+        let echoEnabled = false; // Echo is off by default
+
+function echoRemover(message) {
+    if (echoEnabled) {
+        console.log(message); // Log to console if echo is enabled
+    }
+}
+
+
+        function speak(text) {
+            const text_speak = new SpeechSynthesisUtterance(text);
+            text_speak.rate = 1;
+            text_speak.volume = 1;
+            text_speak.pitch = 1;
+            window.speechSynthesis.speak(text_speak);
+            echoRemover(text); 
+        }
+
+        function wishMe() {
+            var day = new Date();
+            var hour = day.getHours();
+
+            if (hour >= 0 && hour < 12) {
+                speak("Good Morning boss.. how can I help you...");
+            } else if (hour >= 12 && hour < 17) {
+                speak("Good Afternoon boss...");
+            } else {
+                speak("Good Evening sir...");
+            }
+        }
+
+        window.addEventListener('load', () => {
+            speak("Initializing JARVIS...");
+            wishMe();
+        });
+
+
+
+
+         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+         recognition.continuous = true; 
+         recognition.interimResults = false;
+
+         let isWakeWordDetected = false;
+
+         recognition.onresult = (event) => {
+             const transcript = event.results[event.resultIndex][0].transcript.trim().toLowerCase();
+
+             if (!isWakeWordDetected) {
+                 if (transcript.includes("jarvis")) {
+                     isWakeWordDetected = true;
+                     speak("Yes, how may I assist you?");
+                     content.textContent = "Listening for commands...";
+                 }
+             } else {
+                 content.textContent = transcript;
+                 takeCommand(transcript);
+                 isWakeWordDetected = false; 
+             }
+         }
+
+
+        recognition.onresult = (event) => {
+            const currentIndex = event.resultIndex;
+            const transcript = event.results[currentIndex][0].transcript;
+            content.textContent = transcript;
+            takeCommand(transcript.toLowerCase());
+        };
+
+        btn.addEventListener('click', () => {
+            content.textContent = "Listening...";
+            recognition.start();
+            wishMe();
+        });
+
+        let userName = '';
+
+function takeCommand(message) {
+    if (message.includes('hey') || message.includes('hello')) {
+        speak("Hello Sir, What can I call you?")
+        location.reload();
+        echoEnabled = false;
+            speak("Refreshing the site...");
+           
+                
+    } 
+    else if (message.includes('call me') || message.includes('mera naam')) { 
+
+        // Extract the name that comes after "call me"
+        userName = message.replace("call me", " ").trim();
+        userName = message.replace("mera naam", " ").trim();
+        speak("Hello " + userName + ", how may I help you?");
+    } else if (message.includes('who are you')) {
+        speak("I am a Virtual Assistant JARVIS.");
+     } else if (message.includes('who am i')) {
+            speak("My boss is Darshan p karkera and he as created me.");
+    } else if (message.includes('good boy')) {
+        speak("Thank you sir.");
+    
+    } else if (message.includes("open google")) {
+        window.open("https://google.com", "_blank");
+        speak("Opening Google...");
+    } else if (message.includes("open Youtube")|| message.includes("Open Youtube")|| message.includes("Open youtube")|| message.includes("open youtube")|| message.includes("open YouTube")) {
+        window.open("https://www.youtube.com/", "_blank");
+        speak("Opening YouTube...")
+       // location.reload();
+            speak("Refreshing the site...");
+    } else if (message.includes("open insta")) {
+        window.open("https://www.instagram.com/", "_blank");
+        speak("Opening Instagram...");
+    } else if (message.includes("open Facebook")) {
+        window.open("https://facebook.com", "_blank");
+        speak("Opening Facebook...");
+    } else if (message.includes('what is') || message.includes('who is') || message.includes('what are') || message.includes('who are')) {
+        const query = message.replace(/(what is|who is|what are|who are)/g, "").trim();
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, "_blank");
+        speak("This is what I found on Google regarding " + query);
+    } else if (message.includes("Wikipedia")) {
+        const query = message.replace("open Wikipedia").trim();
+        window.open(`https://en.wikipedia.org/wiki/${encodeURIComponent(query)}`, "_blank");
+        speak("This is what I found on Wikipedia regarding " + query);
+    } else if (message.includes('time')) {
+        const time = new Date().toLocaleString(undefined, { hour: "numeric", minute: "numeric" });
+        speak("The current time is " + time);
+    } else if (message.includes('date')) {
+        const date = new Date().toLocaleString(undefined, { month: "short", day: "numeric" });
+        speak("Today's date is " + date);
+    }else if (message.includes("open spotify")) {
+        window.open("https://open.spotify.com/?flow_ctx=e68bd271-ea6d-48a9-89ec-701c338d82aa%3A1741276657", "_blank");
+        speak("Opening Spotify...");
+    }    else if (message.includes("open amazon")) {
+        window.open("http://amazon.in/?&tag=googhydrabk1-21&ref=pd_sl_5szpgfto9i_e&adgrpid=155259813593&hvpone=&hvptwo=&hvadid=674893540034&hvpos=&hvnetw=g&hvrand=4996227954463657502&hvqmt=e&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=1007785&hvtargid=kwd-64107830&hydadcr=14452_2316413&gad_source=1", "_blank");
+        speak("Opening Amazon...")  
+    } else if (message.includes("open flipkart")) {
+        window.open("https://www.flipkart.com/", "_blank");
+        speak("Opening Flipkart...");     
+            } else if (message.includes("play music")) {
+                speak("Playing music...");
+                // Add your music playing logic here
+            } else if (message.includes("stop music")) {
+                speak("Stopping music...");
+                // Add your music stopping logic here
+            } else if (message.includes("set alarm")) {
+                const time = message.replace("set alarm for", "").trim();
+                speak(`Setting an alarm for ${time}`);
+                // Add your alarm setting logic here
+            } else if (message.includes("remind me to")) {
+                const reminder = message.replace("remind me to", "").trim();
+                speak(`I will remind you to ${reminder}`);
+                // Add your reminder setting logic here
+            } else if (message.includes("weather")) {
+                getWeather();
+            } else if (message.includes("news")) {
+                getNews();
+            } else if (message.includes("joke")) {
+                tellJoke();
+            } else if (message.includes("turn on the lights")) {
+                controlSmartHome("lights", "on");
+            } else if (message.includes("turn off the lights")) {
+                controlSmartHome("lights", "off");
+            } else if (message.includes("set reminder")) {
+                const reminder = message.replace("set reminder", "").trim();
+                setReminder(reminder);
+            } else if (message.includes("set timer for")) {
+                const time = message.replace("set timer for", "").trim();
+                setTimer(time);
+            } else if (message.includes("increase volume")) {
+                controlVolume("up");
+            } else if (message.includes("decrease volume")) {
+                controlVolume("down");
+            } else if (message.includes("translate")) {
+                const text = message.replace("translate", "").trim();
+                speak("Translation feature has been disabled.");
+            } else if (message.includes("convert currency")) {
+                const query = message.replace("convert currency", "").trim();
+                convertCurrency(query);
+            } else if (message.includes("calculate")) {
+                const expression = message.replace("calculate", "").trim();
+                calculate(expression);
+            } else if (message.includes("define")) {
+                const word = message.replace("define", "").trim();
+                defineWord(word);
+            } else if (message.includes("weather forecast")) {
+                getWeatherForecast();
+            } else if (message.includes("traffic update")) {
+                getTrafficUpdate();
+            } else if (message.includes("send email")) {
+                const emailContent = message.replace("send email", "").trim();
+                sendEmail(emailContent);
+    } else {
+        const query = message.trim();
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, "_blank");
+        speak("I found some information for " + query + " on Google.");
+    }
+}
+     function getWeather() {
+        fetch('https://api.openweathermap.org/data/2.5/weather?q=YOUR_CITY&appid=YOUR_API_KEY')
+            .then(response => response.json())
+            .then(data => {
+                const temp = data.main.temp - 273.15; // Convert from Kelvin to Celsius
+                const weather = data.weather[0].description;
+                speak(`The current temperature is ${temp.toFixed(2)} degrees Celsius with ${weather}.`);
+            })
+            .catch(error => {
+                speak("Sorry, I couldn't fetch the weather information.");
+            });
+    }
+
+    function getWeatherForecast() {
+        fetch('https://api.openweathermap.org/data/2.5/forecast/daily?q=YOUR_CITY&cnt=7&appid=YOUR_API_KEY')
+            .then(response => response.json())
+            .then(data => {
+                speak("Here is the 7-day weather forecast:");
+                data.list.forEach((day, index) => {
+                    const temp = day.temp.day - 273.15; // Convert from Kelvin to Celsius
+                    const weather = day.weather[0].description;
+                    speak(`Day ${index + 1}: ${temp.toFixed(2)} degrees Celsius with ${weather}.`);
+                });
+            })
+            .catch(error => {
+                speak("Sorry, I couldn't fetch the weather forecast.");
+            });
+    }
+
+    function getTrafficUpdate() {
+        fetch('https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=YOUR_LAT,YOUR_LON&key=YOUR_API_KEY')
+            .then(response => response.json())
+            .then(data => {
+                const traffic = data.flowSegmentData.currentSpeed;
+                speak(`The current traffic speed is ${traffic} km/h.`);
+            })
+            .catch(error => {
+                speak("Sorry, I couldn't fetch the traffic update.");
+            });
+    }
+
+    function sendEmail(content) {
+        // Replace with your email sending logic
+        speak(`Sending email with content: ${content}`);
+    }
+
+    function getNews() {
+        fetch('https://newsapi.org/v2/top-headlines?country=YOUR_COUNTRY&apiKey=YOUR_API_KEY')
+            .then(response => response.json())
+            .then(data => {
+                const articles = data.articles;
+                if (articles.length > 0) {
+                    speak("Here are the top news headlines:");
+                    articles.slice(0, 5).forEach(article => {
+                        speak(article.title);
+                    });
+                } else {
+                    speak("Sorry, I couldn't find any news articles.");
+                }
+            })
+            .catch(error => {
+                speak("Sorry, I couldn't fetch the news.");
+            });
+    }
+
+    function tellJoke() {
+        fetch('https://official-joke-api.appspot.com/random_joke')
+            .then(response => response.json())
+            .then(data => {
+                speak(`${data.setup} ... ${data.punchline}`);
+            })
+            .catch(error => {
+                speak("Sorry, I couldn't fetch a joke.");
+            });
+    }
+
+    function controlSmartHome(device, action) {
+        // Replace with your smart home API endpoint and logic
+        speak(`Turning ${action} the ${device}.`);
+    }
+
+    function setReminder(reminder) {
+        // Replace with your reminder setting logic
+        speak(`Reminder set for: ${reminder}`);
+    }
+
+    function setTimer(time) {
+        const [minutes, seconds] = time.split(" ").map(Number);
+        const duration = (minutes * 60 + seconds) * 1000;
+        speak(`Setting a timer for ${minutes} minutes and ${seconds} seconds.`);
+        setTimeout(() => {
+            speak("Time's up!");
+        }, duration);
+    }
+
+    function controlVolume(direction) {
+        if (direction === "up") {
+            speak("Increasing volume.");
+            // Add your volume increasing logic here
+        } else if (direction === "down") {
+            speak("Decreasing volume.");
+            // Add your volume decreasing logic here
+        }
+    }
+
+    function convertCurrency(query) {
+        const [amount, fromCurrency, toCurrency] = query.split(" ");
+        fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency.toUpperCase()}`)
+            .then(response => response.json())
+            .then(data => {
+                const rate = data.rates[toCurrency.toUpperCase()];
+                const convertedAmount = (amount * rate).toFixed(2);
+                speak(`${amount} ${fromCurrency} is equal to ${convertedAmount} ${toCurrency}`);
+            })
+            .catch(error => {
+                speak("Sorry, I couldn't convert the currency.");
+            });
+    }
+
+    function calculate(expression) {
+        try {
+            const result = eval(expression);
+            speak(`The result is ${result}`);
+        } catch (error) {
+            speak("Sorry, I couldn't calculate the expression.");
+        }
+    }
+
+    function defineWord(word) {
+        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+            .then(response => response.json())
+            .then(data => {
+                const definition = data[0].meanings[0].definitions[0].definition;
+                speak(`The definition of ${word} is: ${definition}`);
+            })
+            .catch(error => {
+                speak("Sorry, I couldn't find the definition.");
+            });
+    }
+
+    function updateUserCount() {
+        let userCount = localStorage.getItem('userCount') || 0;
+        userCount++;
+        localStorage.setItem('userCount', userCount);
+        document.getElementById('user-count').textContent = `Number of users: ${userCount}`;
+    }
+</script>
+</body>
+</html>
